@@ -43,8 +43,10 @@
 
       map.on('locationfound', onLocationFound);
       map.on('locationerror', onLocationError);
-
-      document.getElementById('center-button').onclick = centerMapOnLocation;
+      
+      centerMapOnLocation()
+      
+      document.getElementById('center-button').onclick = centerMapOnLocation();
     </script>
   </body>
 </html>
