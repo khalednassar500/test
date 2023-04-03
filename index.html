@@ -1,54 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>OpenStreetMap Example</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
-    <style>
-      #map {
-        height: 500px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="map"></div>
-    <button id="center-button">Center on Current </button>
+<body>
 
-    <script>
-      var map = L.map('map').setView([51.505, -0.09], 13);
+<p>Click the button to get your coordinates.</p>
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-        maxZoom: 18,
-      }).addTo(map);
+<button onclick="getLocation()">Try It</button>
 
-      function onLocationFound(e) {
-        var radius = e.accuracy / 2;
+<p id="demo"></p>
 
-        L.marker(e.latlng).addTo(map)
-//           .bindPopup("You are within " + radius + " meters from this point").openPopup();
-          .bindPopup("You are within " + radius + " meters from this point khaled").openPopup();
-        
+<script>
+var x = document.getElementById("demo");
 
-        L.circle(e.latlng, radius).addTo(map);
-      }
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else { 
+    x.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
 
-      function onLocationError(e) {
-        alert(e.message);
-      }
+function showPosition(position) {
+  x.innerHTML = "Latitude: " + position.coords.latitude + 
+  "<br>Longitude: " + position.coords.longitude;
+}
+</script>
 
-      function centerMapOnLocation() {
-        map.locate({setView: true, maxZoom: 16});
-      }
-
-      map.on('locationfound', onLocationFound);
-      map.on('locationerror', onLocationError);
-      
-      centerMapOnLocation()
-      
-      document.getElementById('center-button').onclick = centerMapOnLocation();
-    </script>
-  </body>
+</body>
 </html>
+
