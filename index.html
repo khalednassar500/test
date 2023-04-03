@@ -1,30 +1,74 @@
 <!DOCTYPE html>
 <html>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <title>OpenStreetMap Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+      #map {
+        height: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <form>
+      <label for="latitude">Latitude:</label>
+      <input type="text" id="latitude" name="latitude"><br><br>
+      <label for="longitude">Longitude:</label>
+      <input type="text" id="longitude" name="longitude"><br><br>
+      <input type="button" id="show-location-button" value="Show Location">
+    </form>
 
-<p>Click the button to get your coordinates.</p>
+    <script>
+      var map = L.map('map').setView([51.505, -0.09], 13);
 
-<button onclick="getLocation()">Try It</button>
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+        maxZoom: 18,
+      }).addTo(map);
 
-<p id="demo"></p>
+      function onLocationFound(e) {
+        var radius = e.accuracy / 2;
 
-<script>
-var x = document.getElementById("demo");
+        L.marker(e.latlng).addTo(map)
+          .bindPopup("You are within " + radius + " meters from this point").openPopup();
 
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition);
-  } else { 
-    x.innerHTML = "Geolocation is not supported by this browser.";
-  }
-}
+        L.circle(e.latlng, radius).addTo(map);
+      }
 
-function showPosition(position) {
-  x.innerHTML = "Latitude: " + position.coords.latitude + 
-  "<br>Longitude: " + position.coords.longitude;
-}
-</script>
+      function onLocationError(e) {
+        alert(e.message);
+      }
 
-</body>
+      function centerMapOnLocation(lat, lng) {
+        map.setView([lat, lng], 16);
+        L.marker([lat, lng]).addTo(map);
+      }
+
+      function showLocationOnMap() {
+        var lat = document.getElementById('latitude').value;
+        var lng = document.getElementById('longitude').value;
+        centerMapOnLocation(lat, lng);
+      }
+
+      document.getElementById('show-location-button').onclick = showLocationOnMap;
+
+      // Define an array of locations
+      var locations = [
+        {lat: 51.505, lng: -0.09, text: "Location 1"},
+        {lat: 51.51, lng: -0.1, text: "Location 2"},
+        {lat: 51.49, lng: -0.05, text: "Location 3"}
+      ];
+
+      // Add markers for each location
+      for (var i = 0; i < locations.length; i++) {
+        var location = locations[i];
+        L.marker([location.lat, location.lng]).addTo(map)
+          .bindPopup(location.text);
+      }
+    </script>
+  </body>
 </html>
-
